@@ -156,4 +156,39 @@ public class TasksController : ControllerBase {
         .ToListAsync();
         return Ok(overdue);
     }
+
+/// ЗАДАНИЕ 1
+    [HttpPatch("complete-all")]
+    public async Task<ActionResult> CompleteAllTasks()
+    {
+        var incompleteTasks = await _db.Tasks
+            .Where(t => !t.IsCompleted)
+            .ToListAsync();
+        foreach (var task in incompleteTasks)
+        {
+            task.IsCompleted = true;
+        }
+        await _db.SaveChangesAsync();
+        return Ok(new 
+        { 
+            Message = $"Помечено как выполненные: {incompleteTasks.Count} задач",
+            UpdatedCount = incompleteTasks.Count 
+        });
+    }
+
+    /// ЗАДАНИЕ 2
+    [HttpDelete("completed")]
+    public async Task<ActionResult> DeleteCompletedTasks()
+    {
+        var completedTasks = await _db.Tasks
+            .Where(t => t.IsCompleted)
+            .ToListAsync();
+        _db.Tasks.RemoveRange(completedTasks);
+        await _db.SaveChangesAsync();
+        return Ok(new 
+        { 
+            Message = $"Удалено выполненных задач: {completedTasks.Count}",
+            DeletedCount = completedTasks.Count 
+        });
+    }
 }
